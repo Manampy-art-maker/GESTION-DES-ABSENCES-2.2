@@ -459,16 +459,15 @@
     <form id="form-login">
       <div class="field">
         <label for="login-matricule">Matricule</label>
-        <input type="text" id="login-matricule" placeholder="Ex : 278261" required inputmode="numeric">
+        <input type="text" id="login-matricule" required inputmode="numeric">
       </div>
       <div class="field">
         <label for="login-pass">Mot de passe</label>
-        <input type="password" id="login-pass" placeholder="Matricule" required inputmode="numeric">
+        <input type="password" id="login-pass" required inputmode="numeric">
       </div>
       <div id="login-error" class="login-error" style="display:none;">Matricule ou mot de passe incorrect.</div>
       <button type="submit" class="btn" style="width:100%; justify-content:center; margin-top:6px;">Se connecter</button>
     </form>
-    <div class="login-hint">Le mot de passe est identique au matricule.</div>
   </div>
 </div>
 
@@ -579,7 +578,8 @@ function renderStaff(){
 function agentById(id){ return STAFF.find(a=> a.id === Number(id)); }
 function fmtDate(d){
   if(!d) return '—';
-  const [y,m,day] = d.split('-');
+  const datePart = String(d).split('T')[0]; // sécurité si jamais un format ISO complet arrive
+  const [y,m,day] = datePart.split('-');
   return `${day}/${m}/${y}`;
 }
 function nbJours(deb,fin){
