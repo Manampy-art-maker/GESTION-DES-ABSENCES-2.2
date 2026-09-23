@@ -1,0 +1,811 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Gestion des Absences — Division Visa</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --navy: #14213D;
+    --navy-deep: #0A1226;
+    --paper: #F6F4EE;
+    --paper-raised: #FFFFFF;
+    --ink: #22262E;
+    --ink-soft: #5B6472;
+    --gold: #C6900F;
+    --line: #DCD6C7;
+    --ok: #2F6B4F;
+    --ok-bg: #E7F0EA;
+    --warn: #A85A22;
+    --warn-bg: #F5E9DC;
+    --pend: #5B6472;
+    --pend-bg: #E9E7DF;
+    --radius: 3px;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    background:var(--paper);
+    color:var(--ink);
+    font-family:'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    font-size:15px;
+    line-height:1.5;
+  }
+  h1,h2,h3{
+    font-family:'Fraunces', Georgia, 'Times New Roman', serif;
+    font-weight:700;
+    margin:0;
+    color:var(--navy-deep);
+  }
+  a{color:inherit;}
+
+  /* ---- App shell ---- */
+  .shell{display:none; min-height:100vh;}
+
+  .side{
+    width:230px;
+    flex-shrink:0;
+    background:var(--navy-deep);
+    color:#D8DEEB;
+    padding:28px 18px;
+    display:flex;
+    flex-direction:column;
+    gap:26px;
+  }
+  .brand{padding:0 4px;}
+  .brand .mark{
+    display:inline-flex; align-items:center; justify-content:center;
+    width:34px; height:34px;
+    border:1.5px solid var(--gold);
+    border-radius:50%;
+    font-family:'Fraunces',serif;
+    font-weight:600;
+    color:var(--gold);
+    font-size:15px;
+    margin-bottom:10px;
+  }
+  .brand h1{color:#fff; font-size:19px; line-height:1.25;}
+  .brand p{margin:6px 0 0; font-size:12.5px; color:#8D97AD;}
+
+  nav{display:flex; flex-direction:column; gap:2px;}
+  .navbtn{
+    all:unset;
+    cursor:pointer;
+    padding:10px 12px;
+    border-radius:var(--radius);
+    font-size:13.5px;
+    color:#B7BFD1;
+    display:flex;
+    align-items:center;
+    gap:10px;
+    transition:background .15s, color .15s;
+  }
+  .navbtn svg{width:16px; height:16px; flex-shrink:0; opacity:.85;}
+  .navbtn:hover{background:#1E2E52; color:#fff;}
+  .navbtn.active{background:var(--gold); color:#1B1400; font-weight:700;}
+  .navbtn.active svg{opacity:1;}
+
+  .side-foot{
+    margin-top:auto;
+    font-size:11.5px;
+    color:#B7BFD1;
+    border-top:1px solid #2A3A5C;
+    padding-top:14px;
+  }
+
+  .btn-logout{
+    all:unset;
+    cursor:pointer;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    gap:8px;
+    margin-top:10px;
+    padding:9px 12px;
+    width:100%;
+    background:#3A1414;
+    color:#F3C9C0;
+    border:1px solid #6B2A22;
+    border-radius:var(--radius);
+    font-size:12.5px;
+    font-weight:700;
+    transition:background .15s;
+  }
+  .btn-logout:hover{background:#54221C;}
+
+  main{flex:1; padding:34px 44px 60px; max-width:1180px;}
+
+  .pagehead{
+    display:flex;
+    justify-content:space-between;
+    align-items:flex-end;
+    margin-bottom:26px;
+    flex-wrap:wrap;
+    gap:14px;
+  }
+  .pagehead h2{font-size:25px;}
+  .pagehead .sub{color:var(--ink-soft); font-size:13.5px; margin-top:5px;}
+
+  .btn{
+    all:unset;
+    cursor:pointer;
+    display:inline-flex;
+    align-items:center;
+    gap:8px;
+    padding:10px 18px;
+    background:var(--navy);
+    color:#fff;
+    border-radius:var(--radius);
+    font-size:13.5px;
+    font-weight:700;
+    letter-spacing:.1px;
+    transition:background .15s;
+  }
+  .btn:hover{background:var(--navy-deep);}
+  .btn.ghost{background:transparent; color:var(--navy); border:1px solid var(--line);}
+  .btn.ghost:hover{background:#EFEBDD;}
+  .btn:disabled{opacity:.45; cursor:not-allowed;}
+
+  /* stat cards */
+  .stats{display:grid; grid-template-columns:repeat(4,1fr); gap:14px; margin-bottom:30px;}
+  .stat{
+    background:var(--paper-raised);
+    border:1px solid var(--line);
+    border-radius:var(--radius);
+    padding:16px 18px;
+  }
+  .stat .n{font-family:'Fraunces',serif; font-size:30px; font-weight:600; color:var(--navy-deep);}
+  .stat .l{font-size:12px; color:var(--ink-soft); margin-top:2px;}
+
+  /* filters */
+  .filters{
+    display:flex; gap:10px; flex-wrap:wrap; margin-bottom:16px;
+  }
+  select, input[type=text], input[type=date], textarea{
+    font-family:inherit;
+    font-size:13.5px;
+    padding:9px 11px;
+    border:1px solid var(--line);
+    border-radius:var(--radius);
+    background:#fff;
+    color:var(--ink);
+  }
+  select:focus, input:focus, textarea:focus{
+    outline:2px solid var(--gold);
+    outline-offset:1px;
+  }
+
+  table{width:100%; border-collapse:collapse; background:var(--paper-raised); border:1.5px solid var(--line); border-radius:var(--radius); overflow:hidden;}
+  thead th{
+    text-align:left;
+    font-size:11.5px;
+    color:var(--navy-deep);
+    font-weight:700;
+    padding:12px 14px;
+    border-bottom:1.5px solid var(--line);
+    background:#EAE5D4;
+  }
+  tbody td{
+    padding:13px 14px;
+    border-bottom:1px solid #EEEAE0;
+    font-size:13.5px;
+    vertical-align:middle;
+  }
+  tbody tr:last-child td{border-bottom:none;}
+  tbody tr:hover{background:#FBFAF6;}
+  .name{font-weight:700; color:var(--navy-deep);}
+  .matricule{color:var(--ink-soft); font-size:12px;}
+
+  .badge{
+    display:inline-block;
+    padding:3px 9px;
+    border-radius:20px;
+    font-size:11.5px;
+    font-weight:700;
+  }
+  .badge.type-conge{background:#E7ECF5; color:var(--navy);}
+  .badge.type-auth{background:var(--warn-bg); color:var(--warn);}
+  .badge.stat-attente{background:var(--pend-bg); color:var(--pend);}
+  .badge.stat-approuve{background:var(--ok-bg); color:var(--ok);}
+  .badge.stat-refuse{background:#F5DCDC; color:#A23434;}
+
+  .rowbtn{
+    all:unset; cursor:pointer; font-size:12px; color:var(--ink-soft);
+    padding:4px 8px; border-radius:3px;
+  }
+  .rowbtn:hover{background:#EFEBDD; color:var(--ink);}
+  .rowbtn.danger:hover{background:#F5DCDC; color:#A23434;}
+
+  .empty{
+    text-align:center; padding:60px 20px; color:var(--ink-soft);
+  }
+  .empty h3{color:var(--ink-soft); font-weight:600; font-size:16px; margin-bottom:6px;}
+
+  /* form */
+  .card{
+    background:var(--paper-raised);
+    border:1px solid var(--line);
+    border-radius:var(--radius);
+    padding:28px;
+    max-width:620px;
+  }
+  .field{margin-bottom:18px; display:flex; flex-direction:column; gap:6px;}
+  .field label{font-size:12.5px; font-weight:600; color:var(--ink-soft);}
+  .field select, .field input, .field textarea{width:100%;}
+  .row2{display:grid; grid-template-columns:1fr 1fr; gap:14px;}
+  .typepick{display:flex; gap:10px;}
+  .typepick label{
+    flex:1;
+    border:1px solid var(--line);
+    border-radius:var(--radius);
+    padding:12px;
+    cursor:pointer;
+    font-size:13px;
+    font-weight:600;
+    color:var(--ink-soft);
+    display:flex; align-items:center; gap:8px;
+    transition:border-color .15s, background .15s, color .15s;
+  }
+  .typepick input{display:none;}
+  .typepick input:checked + span{color:var(--navy-deep);}
+  .typepick label:has(input:checked){border-color:var(--gold); background:#FBF4E4; color:var(--navy-deep);}
+  .field textarea{resize:vertical; min-height:70px;}
+  .helptext{font-size:12px; color:var(--ink-soft); margin-top:4px;}
+
+  .effectif{
+    background:var(--paper-raised);
+    border:1px solid var(--line);
+    border-radius:var(--radius);
+  }
+
+  footer.note{
+    margin-top:36px; font-size:12px; color:var(--ink-soft); max-width:620px; line-height:1.6;
+  }
+
+  /* ---- login ---- */
+  .login-screen{
+    position:fixed; inset:0; z-index:50;
+    background:var(--navy-deep);
+    display:flex; align-items:center; justify-content:center;
+    padding:20px;
+  }
+  .login-card{
+    background:var(--paper-raised);
+    border-radius:var(--radius);
+    padding:36px 34px;
+    width:100%; max-width:360px;
+    box-shadow:0 20px 50px rgba(0,0,0,.35);
+  }
+  .login-card .mark2{
+    width:38px; height:38px;
+    border:1.5px solid var(--gold);
+    border-radius:50%;
+    display:flex; align-items:center; justify-content:center;
+    font-family:'Fraunces',serif; font-weight:600; color:var(--gold);
+    margin-bottom:16px;
+  }
+  .login-card h2{font-size:21px;}
+  .login-card .sub{font-size:13px; color:var(--ink-soft);}
+  .login-error{
+    background:#F5DCDC; color:#A23434; font-size:12.5px;
+    padding:9px 11px; border-radius:3px; margin-bottom:12px;
+  }
+  .login-hint{font-size:11.5px; color:var(--ink-soft); margin-top:16px; text-align:center;}
+
+  @media (max-width: 880px){
+    .shell{flex-direction:column;}
+    .side{width:100%; flex-direction:row; flex-wrap:wrap; align-items:center; padding:14px 18px; gap:12px 16px;}
+    .brand{display:none;}
+    nav{flex-direction:row; overflow-x:auto; flex:1; min-width:0;}
+    .side-foot{
+      display:flex; align-items:center; justify-content:space-between; gap:10px;
+      width:100%; margin-top:0; border-top:1px solid #2A3A5C; padding-top:12px;
+      font-size:12px;
+    }
+    #who-box{display:flex; align-items:center; justify-content:space-between; gap:10px; width:100%; min-width:0;}
+    .btn-logout{width:auto; margin-top:0; padding:8px 14px; flex-shrink:0;}
+    main{padding:22px;}
+    .stats{grid-template-columns:repeat(2,1fr);}
+    .row2{grid-template-columns:1fr;}
+  }
+</style>
+</head>
+<body>
+
+<div class="shell">
+  <aside class="side">
+    <div class="brand">
+      <div class="mark">V</div>
+      <h1>Division Visa</h1>
+      <p>Gestion des absences</p>
+    </div>
+    <nav>
+      <button class="navbtn active" data-view="dashboard">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="4" width="18" height="16" rx="1.5"/><path d="M3 9h18M8 4v5"/></svg>
+        Tableau de bord
+      </button>
+      <button class="navbtn" data-view="new">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 5v14M5 12h14"/></svg>
+        Nouvelle demande
+      </button>
+      <button class="navbtn" data-view="staff">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="9" cy="8" r="3.2"/><path d="M3 20c0-3.3 2.7-6 6-6s6 2.7 6 6M16 8.5c1.7.2 3 1.6 3 3.4M18 20c0-2-.9-3.7-2.3-4.7"/></svg>
+        Effectif
+      </button>
+    </nav>
+    <div class="side-foot">
+      <div id="who-box">Stockage local du navigateur</div>
+    </div>
+  </aside>
+
+  <main>
+
+    <!-- ============ DASHBOARD ============ -->
+    <section id="view-dashboard">
+      <div class="pagehead">
+        <div>
+          <h2>Tableau de bord</h2>
+          <div class="sub">Suivi des congés et autorisations d'absence de la Division Visa</div>
+        </div>
+        <button class="btn" id="btn-goto-new">+ Nouvelle demande</button>
+      </div>
+
+      <div class="filters">
+        <select id="f-type">
+          <option value="">Tous les types</option>
+          <option value="conge">Congé</option>
+          <option value="auth">Autorisation d'absence</option>
+        </select>
+        <select id="f-statut">
+          <option value="">Tous les statuts</option>
+          <option value="attente">En attente</option>
+          <option value="approuve">Approuvée</option>
+          <option value="refuse">Refusée</option>
+        </select>
+        <select id="f-agent">
+          <option value="">Tous les agents</option>
+        </select>
+      </div>
+
+      <div id="table-wrap"></div>
+    </section>
+
+    <!-- ============ NEW REQUEST ============ -->
+    <section id="view-new" style="display:none;">
+      <div class="pagehead">
+        <div>
+          <h2>Nouvelle demande</h2>
+          <div class="sub">Enregistrer un congé ou une autorisation d'absence</div>
+        </div>
+      </div>
+
+      <div class="card">
+        <form id="form-new">
+          <div class="field">
+            <label>Agent</label>
+            <div id="agent-readonly" style="padding:10px 12px; border:1px solid var(--line); border-radius:3px; background:#F6F4EE; font-weight:600; color:var(--navy-deep);"></div>
+          </div>
+
+          <div class="field">
+            <label>Type de demande</label>
+            <div class="typepick">
+              <label><input type="radio" name="type" value="conge" checked><span>Congé</span></label>
+              <label><input type="radio" name="type" value="auth"><span>Autorisation d'absence</span></label>
+            </div>
+          </div>
+
+          <div class="row2">
+            <div class="field">
+              <label for="in-debut">Date de début</label>
+              <input type="date" id="in-debut" required>
+            </div>
+            <div class="field">
+              <label for="in-fin">Date de fin</label>
+              <input type="date" id="in-fin" required>
+            </div>
+          </div>
+
+          <div class="field">
+            <label for="in-motif">Motif</label>
+            <textarea id="in-motif" placeholder="Ex : congé annuel, raison médicale, affaire personnelle…"></textarea>
+          </div>
+
+          <div class="field">
+            <label for="in-statut">Statut</label>
+            <select id="in-statut">
+              <option value="attente">En attente</option>
+              <option value="approuve">Approuvée</option>
+              <option value="refuse">Refusée</option>
+            </select>
+          </div>
+
+          <div style="display:flex; gap:10px; margin-top:6px;">
+            <button type="submit" class="btn">Enregistrer la demande</button>
+            <button type="button" class="btn ghost" id="btn-cancel-new">Annuler</button>
+          </div>
+        </form>
+      </div>
+
+      <footer class="note">Les données sont conservées dans un Google Sheets partagé : tous les agents qui utilisent ce site voient les mêmes demandes (actualisation toutes les 15 secondes).</footer>
+    </section>
+
+    <!-- ============ STAFF ============ -->
+    <section id="view-staff" style="display:none;">
+      <div class="pagehead">
+        <div>
+          <h2>Effectif</h2>
+          <div class="sub">Liste des agents de la Division Visa</div>
+        </div>
+      </div>
+      <div class="effectif">
+        <table>
+          <thead><tr><th>Nom et prénoms</th><th>Matricule</th><th>Fonction</th></tr></thead>
+          <tbody id="staff-body"></tbody>
+        </table>
+      </div>
+    </section>
+
+  </main>
+</div>
+
+<div id="login-screen" class="login-screen">
+  <div class="login-card">
+    <div class="mark2">V</div>
+    <h2>Division Visa</h2>
+    <div class="sub" style="margin-bottom:22px;">Connexion — congés &amp; autorisations d'absence</div>
+    <form id="form-login">
+      <div class="field">
+        <label for="login-matricule">Matricule</label>
+        <input type="text" id="login-matricule" placeholder="Ex : 278261" required inputmode="numeric">
+      </div>
+      <div class="field">
+        <label for="login-pass">Mot de passe</label>
+        <input type="password" id="login-pass" placeholder="Matricule" required inputmode="numeric">
+      </div>
+      <div id="login-error" class="login-error" style="display:none;">Matricule ou mot de passe incorrect.</div>
+      <button type="submit" class="btn" style="width:100%; justify-content:center; margin-top:6px;">Se connecter</button>
+    </form>
+    <div class="login-hint">Le mot de passe est identique au matricule.</div>
+  </div>
+</div>
+
+<script>
+/* =================================================================
+   CONFIGURATION — Google Sheets (stockage partagé)
+   Renseignez ici l'adresse "Web app" obtenue lors du déploiement
+   du Google Apps Script (voir le guide d'installation fourni).
+   ================================================================= */
+const APPS_SCRIPT_URL = "APETAHO_ETO_NY_ADIRESY_WEB_APP";
+
+/* ---------------- Data ---------------- */
+const STAFF = [
+  { id:1,  nom:"RAZAFINDRASOAVA Hery Miharisoa",              matricule:"278261", fonction:"Chef de Division Visa" },
+  { id:2,  nom:"VOLATIANA Nathalie",                          matricule:"374940", fonction:"Responsable courrier Visa" },
+  { id:3,  nom:"ANDRIANOELISOA Heriniaina",                   matricule:"384850", fonction:"Comptable Visa" },
+  { id:4,  nom:"RAKOTOMALALA Velomanampy Jean Chrystophe",    matricule:"493766", fonction:"Comptable Visa" },
+  { id:5,  nom:"RAZAFIMIARANTSOA Mahaenina",                  matricule:"342762", fonction:"Comptable Visa" },
+  { id:6,  nom:"RATEFIARIVELO Tanjona Barisoa",                matricule:"342759", fonction:"Chef de Bureau Visa" },
+  { id:8,  nom:"RATSIMBAZAFY Lalaina Harisoa",                 matricule:"335005", fonction:"Chef de Bureau Visa" },
+  { id:9,  nom:"FENOTOKY Joelson",                             matricule:"380263", fonction:"Comptable Visa" },
+  { id:10, nom:"RAKOTONANDRASANA Michel Altophère",           matricule:"445779", fonction:"Comptable Visa" },
+  { id:11, nom:"SOAMITIRY Corine Yvanna",                      matricule:"352883", fonction:"Chef de Bureau Visa" },
+  { id:12, nom:"RAHARIMANAMIHANTANIRIANA Miary",              matricule:"317144", fonction:"Comptable Visa" },
+];
+
+let demandes = [];
+let lastLoadOk = null; // null = jamais chargé, true/false = résultat du dernier essai
+
+function urlConfigured(){
+  return APPS_SCRIPT_URL && !APPS_SCRIPT_URL.includes('APETAHO_ETO');
+}
+
+async function fetchDemandes(){
+  if(!urlConfigured()) return null;
+  try{
+    const res = await fetch(APPS_SCRIPT_URL + '?t=' + Date.now());
+    const data = await res.json();
+    return data.map(r => ({
+      id: Number(r.id),
+      agentId: Number(r.agentId),
+      type: r.type,
+      debut: r.debut,
+      fin: r.fin,
+      motif: r.motif,
+      statut: r.statut,
+      creeLe: Number(r.creeLe),
+    }));
+  }catch(e){
+    console.error('fetchDemandes', e);
+    return false; // hadisoana fifandraisana
+  }
+}
+
+async function postAction(payload){
+  try{
+    await fetch(APPS_SCRIPT_URL, {
+      method: 'POST',
+      headers: {'Content-Type': 'text/plain;charset=utf-8'},
+      body: JSON.stringify(payload),
+    });
+    return true;
+  }catch(e){
+    console.error('postAction', e);
+    return false;
+  }
+}
+
+/* ---------------- Navigation ---------------- */
+const views = {
+  dashboard: document.getElementById('view-dashboard'),
+  new: document.getElementById('view-new'),
+  staff: document.getElementById('view-staff'),
+};
+document.querySelectorAll('.navbtn').forEach(btn=>{
+  btn.addEventListener('click', ()=> goto(btn.dataset.view));
+});
+document.getElementById('btn-goto-new').addEventListener('click', ()=> goto('new'));
+document.getElementById('btn-cancel-new').addEventListener('click', ()=> goto('dashboard'));
+
+function goto(view){
+  Object.entries(views).forEach(([k,el])=> el.style.display = (k===view? '' : 'none'));
+  document.querySelectorAll('.navbtn').forEach(b=> b.classList.toggle('active', b.dataset.view===view));
+  if(view==='dashboard') renderDashboard();
+  if(view==='staff') renderStaff();
+}
+
+/* ---------------- Populate selects ---------------- */
+function fillAgentSelects(){
+  const filterSelect = document.getElementById('f-agent');
+  filterSelect.innerHTML = '<option value="">Tous les agents</option>' +
+    STAFF.map(a=>`<option value="${a.id}">${a.nom}</option>`).join('');
+}
+fillAgentSelects();
+
+/* ---------------- Staff view ---------------- */
+function renderStaff(){
+  document.getElementById('staff-body').innerHTML = STAFF.map(a=>`
+    <tr>
+      <td class="name">${a.nom}</td>
+      <td class="matricule">${a.matricule}</td>
+      <td>${a.fonction}</td>
+    </tr>
+  `).join('');
+}
+
+/* ---------------- Helpers ---------------- */
+function agentById(id){ return STAFF.find(a=> a.id === Number(id)); }
+function fmtDate(d){
+  if(!d) return '—';
+  const [y,m,day] = d.split('-');
+  return `${day}/${m}/${y}`;
+}
+function nbJours(deb,fin){
+  const d1 = new Date(deb), d2 = new Date(fin);
+  const diff = Math.round((d2-d1)/86400000)+1;
+  return diff>0? diff : 0;
+}
+function typeLabel(t){ return t==='conge' ? 'Congé' : "Autorisation d'absence"; }
+function statutLabel(s){ return s==='attente'?'En attente': s==='approuve'?'Approuvée':'Refusée'; }
+
+/* ---------------- Dashboard ---------------- */
+let dashboardBusy = false;
+
+async function renderDashboard(){
+  const wrap = document.getElementById('table-wrap');
+
+  if(!urlConfigured()){
+    wrap.innerHTML = `<div class="empty"><h3>Stockage partagé non configuré</h3><p>Renseignez l'adresse "Web app" de Google Apps Script dans la variable APPS_SCRIPT_URL du code (voir le guide d'installation).</p></div>`;
+    return;
+  }
+
+  if(!dashboardBusy){
+    dashboardBusy = true;
+    wrap.innerHTML = `<div class="empty"><h3>Chargement…</h3><p>Connexion à Google Sheets en cours.</p></div>`;
+    const result = await fetchDemandes();
+    dashboardBusy = false;
+    if(result === false){
+      lastLoadOk = false;
+      wrap.innerHTML = `<div class="empty"><h3>Connexion impossible</h3><p>Les données n'ont pas pu être récupérées. Vérifiez la connexion internet, ou l'adresse APPS_SCRIPT_URL.</p></div>`;
+      return;
+    }
+    lastLoadOk = true;
+    demandes = result;
+  }
+
+  const fType = document.getElementById('f-type').value;
+  const fStatut = document.getElementById('f-statut').value;
+  const fAgent = document.getElementById('f-agent').value;
+
+  let list = demandes.slice().sort((a,b)=> b.creeLe - a.creeLe);
+  if(fType) list = list.filter(d=> d.type === fType);
+  if(fStatut) list = list.filter(d=> d.statut === fStatut);
+  if(fAgent) list = list.filter(d=> String(d.agentId) === fAgent);
+
+  if(list.length===0){
+    wrap.innerHTML = `<div class="empty"><h3>Aucune demande</h3><p>Ajoutez une nouvelle demande de congé ou d'autorisation d'absence pour commencer.</p></div>`;
+    return;
+  }
+
+  wrap.innerHTML = `
+    <table>
+      <thead>
+        <tr>
+          <th>Agent</th>
+          <th>Type</th>
+          <th>Période</th>
+          <th>Jours</th>
+          <th>Motif</th>
+          <th>Statut</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody>
+        ${list.map(d=>{
+          const a = agentById(d.agentId);
+          return `
+          <tr>
+            <td>
+              <div class="name">${a? a.nom : '—'}</div>
+              <div class="matricule">${a? a.matricule : ''}</div>
+            </td>
+            <td><span class="badge type-${d.type}">${typeLabel(d.type)}</span></td>
+            <td>${fmtDate(d.debut)} → ${fmtDate(d.fin)}</td>
+            <td>${nbJours(d.debut,d.fin)}</td>
+            <td>${d.motif? d.motif : '—'}</td>
+            <td>
+              <select class="statut-select" data-id="${d.id}">
+                <option value="attente" ${d.statut==='attente'?'selected':''}>En attente</option>
+                <option value="approuve" ${d.statut==='approuve'?'selected':''}>Approuvée</option>
+                <option value="refuse" ${d.statut==='refuse'?'selected':''}>Refusée</option>
+              </select>
+            </td>
+            <td><button class="rowbtn danger" data-del="${d.id}">Supprimer</button></td>
+          </tr>`;
+        }).join('')}
+      </tbody>
+    </table>
+  `;
+
+  wrap.querySelectorAll('.statut-select').forEach(sel=>{
+    sel.addEventListener('change', async e=>{
+      const id = Number(e.target.dataset.id);
+      const statut = e.target.value;
+      e.target.disabled = true;
+      await postAction({action:'updateStatus', id, statut});
+      const d = demandes.find(x=>x.id===id);
+      if(d) d.statut = statut;
+      renderDashboard();
+    });
+  });
+  wrap.querySelectorAll('[data-del]').forEach(btn=>{
+    btn.addEventListener('click', async e=>{
+      const id = Number(e.target.dataset.del);
+      if(confirm('Supprimer cette demande ?')){
+        btn.disabled = true;
+        await postAction({action:'delete', id});
+        demandes = demandes.filter(d=> d.id !== id);
+        renderDashboard();
+      }
+    });
+  });
+}
+
+['f-type','f-statut','f-agent'].forEach(id=>{
+  document.getElementById(id).addEventListener('change', ()=>{
+    // filtrage local, pas besoin de recontacter Google Sheets
+    const fType = document.getElementById('f-type').value;
+    const fStatut = document.getElementById('f-statut').value;
+    const fAgent = document.getElementById('f-agent').value;
+    let list = demandes.slice().sort((a,b)=> b.creeLe - a.creeLe);
+    if(fType) list = list.filter(d=> d.type === fType);
+    if(fStatut) list = list.filter(d=> d.statut === fStatut);
+    if(fAgent) list = list.filter(d=> String(d.agentId) === fAgent);
+    dashboardBusy = true; // empêche un nouveau chargement en parallèle
+    renderDashboard().finally(()=> dashboardBusy = false);
+  });
+});
+
+// Actualisation automatique toutes les 15 secondes, si le tableau de bord est affiché
+setInterval(()=>{
+  const visible = views.dashboard && views.dashboard.style.display !== 'none' && currentAgent;
+  if(visible && !dashboardBusy) renderDashboard();
+}, 15000);
+
+/* ---------------- New request form ---------------- */
+document.getElementById('form-new').addEventListener('submit', async e=>{
+  e.preventDefault();
+  if(!currentAgent) { goto('dashboard'); return; }
+  if(!urlConfigured()){ alert("Le stockage partagé (APPS_SCRIPT_URL) n'est pas encore configuré."); return; }
+
+  const agentId = currentAgent.id;
+  const type = document.querySelector('input[name=type]:checked').value;
+  const debut = document.getElementById('in-debut').value;
+  const fin = document.getElementById('in-fin').value;
+  const motif = document.getElementById('in-motif').value.trim();
+  const statut = document.getElementById('in-statut').value;
+
+  if(!debut || !fin){ alert('Merci de renseigner les dates de début et de fin.'); return; }
+  if(fin < debut){ alert('La date de fin doit être postérieure ou égale à la date de début.'); return; }
+
+  const submitBtn = e.target.querySelector('button[type=submit]');
+  submitBtn.disabled = true;
+
+  const demande = {
+    id: Date.now(),
+    agentId,
+    agentNom: currentAgent.nom,
+    agentMatricule: currentAgent.matricule,
+    type, debut, fin, motif, statut,
+    creeLe: Date.now(),
+  };
+  const okPost = await postAction({action:'add', demande});
+  submitBtn.disabled = false;
+
+  if(!okPost){
+    alert("La demande n'a pas pu être enregistrée. Merci de réessayer.");
+    return;
+  }
+
+  e.target.reset();
+  document.getElementById('in-statut').value = 'attente';
+  goto('dashboard');
+});
+
+/* ---------------- Auth (login = matricule, mot de passe = matricule) ---------------- */
+const SESSION_KEY = "visa_absences_session_v1";
+let currentAgent = null;
+
+function showApp(){
+  document.getElementById('login-screen').style.display = 'none';
+  document.querySelector('.shell').style.display = 'flex';
+  document.getElementById('agent-readonly').textContent = `${currentAgent.nom} — ${currentAgent.matricule}`;
+  document.getElementById('who-box').innerHTML = `<span style="overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">Connecté : <strong>${currentAgent.nom}</strong></span><button class="btn-logout" id="btn-logout" type="button"><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><path d="M16 17l5-5-5-5"/><path d="M21 12H9"/></svg>Se déconnecter</button>`;
+  document.getElementById('btn-logout').addEventListener('click', logout);
+  goto('dashboard');
+}
+
+function showLogin(){
+  document.querySelector('.shell').style.display = 'none';
+  document.getElementById('login-screen').style.display = 'flex';
+}
+
+function logout(){
+  try{ localStorage.removeItem(SESSION_KEY); }catch(e){}
+  currentAgent = null;
+  document.getElementById('form-login').reset();
+  showLogin();
+}
+
+document.getElementById('form-login').addEventListener('submit', e=>{
+  e.preventDefault();
+  const login = document.getElementById('login-matricule').value.trim();
+  const pass = document.getElementById('login-pass').value.trim();
+  const errBox = document.getElementById('login-error');
+  const agent = STAFF.find(a=> a.matricule === login);
+
+  if(!agent || pass !== agent.matricule){
+    errBox.style.display = 'block';
+    return;
+  }
+  errBox.style.display = 'none';
+  currentAgent = agent;
+  try{ localStorage.setItem(SESSION_KEY, String(agent.id)); }catch(e){}
+  showApp();
+});
+
+/* ---------------- Init ---------------- */
+(function init(){
+  let savedId = null;
+  try{ savedId = localStorage.getItem(SESSION_KEY); }catch(e){}
+  if(savedId){
+    const agent = agentById(savedId);
+    if(agent){ currentAgent = agent; showApp(); return; }
+  }
+  showLogin();
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,76 @@
+FITANTANANA NY TSY FAHATONGAVANA — Divizionan'ny Visa
+TOROLALANA FAMETRAHANA (Google Sheets iombonana)
+=========================================================
+
+Mila kaonty Google iray (an'ny mpandrindra, ohatra) ianao mba
+hanaovana ity dingana ity, indray mandeha fotsiny.
+
+
+DINGANA 1 — Mamorona Google Sheet
+-----------------------------------
+1. Midira ao amin'ny sheets.google.com
+2. Mamorona classeur vaovao, ataovy anarana hoe : "Fitantanana Tsy
+   Fahatongavana - Visa"
+
+
+DINGANA 2 — Mampiditra ny code (Apps Script)
+-----------------------------------------------
+1. Ao amin'io Sheet io, tsindrio ny tolotra "Extensions" > "Apps
+   Script"
+2. Hisy tetezana misokatra amin'ny "Code.gs". Fafao izay rehetra
+   efa ao, dia apetaho ny votoatin'ny fichier "Code.gs" nomena
+   miaraka amin'ity torolàlana ity.
+3. Tsindrio ny kisary "disquette" (Enregistrer) eo ambony.
+
+
+DINGANA 3 — "Publier" ho Web App
+-----------------------------------
+1. Eo amin'ny zoro ambony havanana, tsindrio "Déployer" >
+   "Nouveau déploiement"
+2. Tsindrio ny kisary "roue dentée" eo akaikin'ny "Sélectionner le
+   type", dia safidio "Application Web" (Web app)
+3. Amin'ny "Exécuter en tant que" : safidio "Moi" (ny anaranao)
+4. Amin'ny "Qui a accès" : safidio "Tout le monde" (Anyone) —
+   ilaina izany mba hahafahan'ny website mifandray amin'io Sheet io
+5. Tsindrio "Déployer"
+6. Angatahina hanome fahazoan-dalana ianao (Autoriser l'accès) —
+   ekeo daholo ny fanontaniana miseho (na dia misy hafatra hoe
+   "application non validée" aza, tsindrio "Paramètres avancés" >
+   "Accéder à [anaran'ny projet] (dangereux)" — azo antoka izany
+   satria ianao no nanoratra ny code)
+7. Rehefa vita, dia hiseho ny adiresy "URL de l'application Web".
+   ADIKAO na SORATO tsara io adiresy io (manomboka amin'ny
+   https://script.google.com/macros/...)
+
+
+DINGANA 4 — Ampidiro ny adiresy ao amin'ny website
+------------------------------------------------------
+1. Sokafy ny fichier "index.html" amin'ny alalan'ny "Bloc-notes"
+   (Notepad) na "Modifier le code" ao amin'ny GitHub
+2. Tadiavo ny andalana manomboka amin'ny :
+       const APPS_SCRIPT_URL = "APETAHO_ETO_NY_ADIRESY_WEB_APP";
+3. Soloy ny "APETAHO_ETO_NY_ADIRESY_WEB_APP" amin'ilay adiresy
+   URL noraisinao tao amin'ny Dingana 3, ao anaty tsipika ("...")
+4. Tehirizo ny fichier
+
+
+DINGANA 5 — Hampidirina @ GitHub
+------------------------------------
+1. Alefaso (upload) ny "index.html" efa novana ho ao amin'ny
+   fototry ny repository (raha GitHub Pages no ampiasaina)
+2. Vonona ny website — samy midira amin'ny finday na solosaina
+   ny mpiasa tsirairay, ary iray ihany ny angona hita amin'izy
+   rehetra
+
+
+FANAMARIHANA
+-------------
+- Ny matricule isan'olona no login sy mot de passe (efa voafaritra
+  ao amin'ny STAFF ao anaty index.html)
+- Raha misy mpiasa vaovao na tokony hovana ny lisitra, dia any
+  amin'ny STAFF ao anaty index.html no ovana
+- Ny angona rehetra dia hita ao amin'ny Google Sheet ihany koa,
+  azonao jerena mivantana raha ilaina
+- Raha misy olana amin'ny fifandraisana, dia avero jerena raha
+  marina ny adiresy APPS_SCRIPT_URL, ary raha "Tout le monde" tokoa
+  no safidy tao amin'ny "Qui a accès"
